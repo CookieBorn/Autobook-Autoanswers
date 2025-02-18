@@ -17,6 +17,7 @@ class Window:
         self.file_menu_select=StringVar()
         self.folder=folder
         self.files=[]
+        self.clicked=StringVar()
         self.get_files()
 
         button_load=Button(text="Load", background="green", command=self.load)
@@ -25,32 +26,40 @@ class Window:
         button_answers=Button(text="Answers", background="green")
         self.canvas.create_window(100,200,window=button_answers)
 
-        option_1=self.files[0]
 
-        self.file_menu_select=self.files[0]
+        self.clicked.set(self.files[0])
 
-        file_menu = OptionMenu(self.root,self.file_menu_select, *self.files)
-        self.canvas.create_window(100,300,window=file_menu)
+        self.file_menu = OptionMenu(self.root,self.clicked, *self.files,command=self.file_set)
+        self.canvas.create_window(200,300,window=self.file_menu)
 
 
     def redraw(self):
         self.root.update_idletasks()
         self.root.update()
 
+    def file_set(self,selection):
+        self.file_menu_select=selection
+        print(self.file_menu_select)
+
     def load(self):
         file_copy=str(self.file_menu_select)[:-4]+"-copy.pdf"
         if os.path.isfile(os.path.join(self.folder,file_copy)):
-            self.canvas.create_oval((self.width/8)*3+100,(self.height/8)*3, (self.width/8)*5+100, (self.height/8)*5, fill="white")
-            self.canvas.create_text(self.width/2+100,self.height/2, text="Copy Exists", fill="green", font=('Helvetica 15 bold'))
+            self.popup_text("Copy Already Created")
         else:
-            self.canvas.create_oval((self.width/8)*3+100,(self.height/8)*3, (self.width/8)*5+100, (self.height/8)*5, fill="white")
-            self.canvas.create_text(self.width/2+100,self.height/2, text="Copy Made", fill="green", font=('Helvetica 15 bold'))
-            shutil.copyfile(os.path.join(self.folder,self.file_menu_select),os.path.join(self.folder,file_copy))
+            self.popup_text("Copy Made")
+            shutil.copyfile(os.path.join(self.folder,str(self.file_menu_select)),os.path.join(self.folder,file_copy))
+            self.get_files()
+
 
     def wait_for_close(self):
         self.running=True
         while self.running is True:
             self.redraw()
+
+
+    def popup_text(self,text):
+        self.canvas.create_oval((self.width/8)*3+100,(self.height/8)*3, (self.width/8)*5+100, (self.height/8)*5, fill="white")
+        self.canvas.create_text(self.width/2+100,self.height/2, text=text, fill="green", font=('Helvetica 15 bold'))
 
     def close(self):
         self.running=False
