@@ -10,7 +10,9 @@ class Autoblock():
         self.columns=numbers[0:10]
         self.rows=numbers[10:20]
         self.answers=numbers[0:10]
+        self.text=None
         self.answers_fill()
+        self.text_block()
         print(self.answers)
 
     def answers_fill(self):
@@ -23,3 +25,6 @@ class Autoblock():
                     self.answers.append(f"{int(self.columns[x])+int(self.rows[inx])} ")
                     x+=1
                 inx+=1
+
+    def text_block(self):
+        self.text="\n".join(self.answers)
