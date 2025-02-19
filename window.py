@@ -81,7 +81,6 @@ class Window:
         self.files=sorted(self.files)
 
     def load(self):
-        print(str(self.file_menu_select)[-3:])
         if str(self.file_menu_select)[-3:]=="pdf":
             working_file=PDF_reader(self.file_menu_select, self)
             self.popup_text(f"{self.file_menu_select} succesfully loaded")
