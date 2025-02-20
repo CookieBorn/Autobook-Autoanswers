@@ -11,7 +11,7 @@ class Autoblock():
         self.rows=numbers[10:20]
         self.answers=numbers[0:10]
         self.text=None
-        self.answers_fill()
+
         self.text_block()
         print(self.answers)
 

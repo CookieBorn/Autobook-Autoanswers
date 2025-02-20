@@ -1,7 +1,7 @@
 from tkinter import *
 import shutil
 import os
-from pdf_reader import PDF_reader
+from pdf_reader import DOC_reader
 
 class Window:
     def __init__(self,name, width, height, folder, run=None):
@@ -50,7 +50,10 @@ class Window:
         self.canvas.create_window(200,300,window=self.file_menu)
 
     def copy(self):
-        file_copy=str(self.file_menu_select)[:-4]+"-copy."+str(self.file_menu_select)[-3:]
+        if str(self.file_menu_select)[-5:]==".docx":
+            file_copy=str(self.file_menu_select)[:-5]+"-copy."+str(self.file_menu_select)[-4:]
+        else:
+            file_copy=str(self.file_menu_select)[:-4]+"-copy."+str(self.file_menu_select)[-3:]
         if os.path.isfile(os.path.join(self.folder,file_copy)):
             self.popup_text("Copy Already Created")
         else:
@@ -81,8 +84,8 @@ class Window:
         self.files=sorted(self.files)
 
     def load(self):
-        if str(self.file_menu_select)[-3:]=="pdf":
-            working_file=PDF_reader(self.file_menu_select, self)
+        if str(self.file_menu_select)[-4:]=="docx":
+            working_file=DOC_reader(self.file_menu_select, self)
             self.popup_text(f"{self.file_menu_select} succesfully loaded")
         else:
-            self.popup_text("Please load a PDF")
+            self.popup_text("Please load a docx")

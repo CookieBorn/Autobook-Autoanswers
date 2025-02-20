@@ -1,21 +1,27 @@
 import os
 import fitz
 from autoblock import Autoblock
+from pprint import pprint
+from docx import Document
 
-
-class PDF_reader:
+class DOC_reader:
     def __init__(self, name, win):
         self.name = name
         self.win = win
         self.location = os.path.join(self.win.folder, name)
-        self.doc = fitz.open(self.location)
+        self.doc = Document(self.location)
         self.page=None
-        self.print()
+
+
+    def Doc_text(self):
+        self.doc.add_heading("Test",0)
+        for p in self.doc.paragraphs:
+           print(p.text)
 
     def print(self):
         text=""
         for page_num in range(len(self.doc)):
-           self.page = self.doc.load_page(page_num)
+           self.page = self.doc[page_num]
            text += self.page.get_text()
            lines=text.split("\n")
            fil_lines=[]
@@ -26,8 +32,16 @@ class PDF_reader:
            while ind<len(fil_lines):
                if fil_lines[ind]=="+ ":
                    block=Autoblock(fil_lines[ind] ,fil_lines[ind+1:(ind+21)])
-                   self.replace_text(block)
+
                ind+=1
+
+    def find_table(self):
+        page=self.doc[3]
+        tabs=page.find_tables()
+        print(f"{len(tabs.tables)} found on {page}")
+
+        if tabs.tables:
+            pprint(tabs[0].extract())
 
     def replace_text(self,block):
         hits=self.page.search_for(block.symbol)
