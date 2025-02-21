@@ -1,7 +1,8 @@
 from tkinter import *
 import shutil
 import os
-from pdf_reader import DOC_reader
+from docx_reader import DOC_reader
+from pdf_reader import PDF_reader
 
 class Window:
     def __init__(self,name, width, height, folder, run=None):
@@ -25,7 +26,7 @@ class Window:
         self.canvas.create_window(100,100,window=button_copy)
 
         button_load=Button(text="Load", background="green", command=self.load)
-        self.canvas.create_window(100,400,window=button_load)
+        self.canvas.create_window(200,100,window=button_load)
 
 
         self.clicked.set(self.files[0])
@@ -44,7 +45,7 @@ class Window:
         if self.file_menu!=None:
             self.file_menu=None
         self.file_menu = OptionMenu(self.root,self.clicked, *self.files,command=self.file_set)
-        self.canvas.create_window(200,300,window=self.file_menu)
+        self.canvas.create_window(600,100,window=self.file_menu)
 
     def copy(self):
         if str(self.file_menu_select)[-5:]==".docx":
@@ -66,8 +67,8 @@ class Window:
 
 
     def popup_text(self,text):
-        self.canvas.create_oval((self.width/8)*3+100,(self.height/8)*3, (self.width/8)*5+100, (self.height/8)*5, fill="white")
-        self.canvas.create_text(self.width/2+100,self.height/2, text=text, fill="green", font=('Helvetica 15 bold'))
+        self.canvas.create_rectangle(100,200, (self.width)-100, (self.height)-200, fill="white")
+        self.canvas.create_text(self.width/2,self.height/2, text=text, fill="green", font=('Helvetica 15 bold'))
 
     def close(self):
         self.running=False
@@ -82,7 +83,10 @@ class Window:
 
     def load(self):
         if str(self.file_menu_select)[-4:]=="docx":
-            working_file=DOC_reader(self.file_menu_select, self)
+            DOC_reader(self.file_menu_select, self)
+            self.popup_text(f"{self.file_menu_select} succesfully loaded")
+        elif str(self.file_menu_select)[-3:]=="pdf":
+            PDF_reader(self.file_menu_select, self)
             self.popup_text(f"{self.file_menu_select} succesfully loaded")
         else:
-            self.popup_text("Please load a docx")
+            self.popup_text("Please load a pdf or docx")

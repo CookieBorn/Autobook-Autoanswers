@@ -1,8 +1,3 @@
-from operator import index
-import os
-import fitz
-
-
 class Autoblock():
     def __init__(self, symbol, numbers):
         self.symbol=symbol
