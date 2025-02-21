@@ -11,6 +11,10 @@ class DOC_reader:
         self.location = os.path.join(self.win.folder, name)
         self.doc = Document(self.location)
         self.page=None
+        self.tables=None
+        self.solve_auto()
+        self.doc.save(self.location)
+
 
 
     def Doc_text(self):
@@ -29,10 +33,10 @@ class DOC_reader:
                if line!=" ":
                    fil_lines.append(line)
            ind=0
+           print(fil_lines)
            while ind<len(fil_lines):
                if fil_lines[ind]=="+ ":
                    block=Autoblock(fil_lines[ind] ,fil_lines[ind+1:(ind+21)])
-
                ind+=1
 
     def find_table(self):
@@ -43,9 +47,18 @@ class DOC_reader:
         if tabs.tables:
             pprint(tabs[0].extract())
 
-    def replace_text(self,block):
-        hits=self.page.search_for(block.symbol)
-        for rect in hits:
-            self.page.add_redact_annot(rect,block.answers,fontname="helv",fontsize=11,align=fitz.TEXT_ALIGN_CENTER)
-        self.page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
-        self.doc.save(self.name,garbage=3,deflate=True)
+    def solve_auto(self):
+        for table in self.doc.tables:
+            if table.cell(0,0).text=="+":
+                for i in range(1, len(table.rows)):
+                    for g in range(1, len(table.columns)):
+                        table.cell(i,g).text=str(int(table.cell(0,g).text)+int(table.cell(i,0).text))
+            elif table.cell(0,0).text=="-":
+                for i in range(1, len(table.rows)):
+                    for g in range(1, len(table.columns)):
+                        table.cell(i,g).text=str(int(table.cell(0,g).text)-int(table.cell(i,0).text))
+            elif table.cell(0,0).text=="x":
+                if table.cell(1,0).text != " ":
+                    for i in range(1, len(table.rows)):
+                        for g in range(1, len(table.columns)):
+                            table.cell(i,g).text=str(int(table.cell(0,g).text)*int(table.cell(i,0).text))
