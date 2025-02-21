@@ -24,9 +24,6 @@ class Window:
         button_copy=Button(text="Copy", background="green", command=self.copy)
         self.canvas.create_window(100,100,window=button_copy)
 
-        button_answers=Button(text="Answers", background="green")
-        self.canvas.create_window(100,200,window=button_answers)
-
         button_load=Button(text="Load", background="green", command=self.load)
         self.canvas.create_window(100,400,window=button_load)
 
