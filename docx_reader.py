@@ -1,6 +1,7 @@
 import os
 from docx import Document
 from tkinter import *
+from tkinter.ttk import *
 import random
 
 class DOC_reader:
@@ -22,15 +23,6 @@ class DOC_reader:
 
         button_create=Button(text="Create", background="green", command=self.create_auto)
         self.win.canvas.create_window(300,100,window=button_create)
-
-
-
-
-
-    def Doc_text(self):
-        self.doc.add_heading("Test",0)
-        for p in self.doc.paragraphs:
-           print(p.text)
 
     def solve_addition(self,table):
         for i in range(1, len(table.rows)):
@@ -80,11 +72,14 @@ class DOC_reader:
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
 
     def strip_errors(self):
+        progres = Progressbar(self.win, orient = HORIZONTAL, length = (len(self.doc.tables)*121), mode = 'determinate')
+        progres.place(x=200,y=200,width=self.win.horozontal/2)
         for table in self.doc.tables:
             if table.cell(0,0).text=="+" or table.cell(0,0).text=="-" or table.cell(0,0).text=="x":
                 zero_zero=table.cell(0,0).text
                 for i in range(len(table.rows)):
                     for g in range(len(table.columns)):
                         table.cell(i,g).text="".join(c for c in table.cell(i,g).text if c.isdigit() or c=="-")
+                        progres['value'] +=1
                 table.cell(0,0).text=zero_zero
         self.doc.save(self.location)

@@ -21,18 +21,31 @@ class Window:
         self.clicked=StringVar()
         self.file_menu=None
         self.get_files()
+        self.clicked.set(self.files[0])
+        self.file_menu_select.set(self.files[0])
+
+        button_create=Button(text="Create", background="green", command=self.create)
+        self.canvas.create_window(self.width/3,100,window=button_create)
+
+        button_answer=Button(text="Answer", background="green", command=self.answer)
+        self.canvas.create_window((self.width/3)*2,100,window=button_answer)
+
+    def answer(self):
+        self.popup_screen("Answer")
 
         button_copy=Button(text="Copy", background="green", command=self.copy)
-        self.canvas.create_window(100,100,window=button_copy)
+        self.canvas.create_window(200,300,window=button_copy)
 
         button_load=Button(text="Load", background="green", command=self.load)
-        self.canvas.create_window(200,100,window=button_load)
+        self.canvas.create_window(300,300,window=button_load)
 
-
-        self.clicked.set(self.files[0])
         self.menu()
 
+    def create(self):
+        self.popup_screen("Create")
 
+        button_copy=Button(text="Copy", background="green", command=self.copy)
+        self.canvas.create_window(300,300,window=button_copy)
 
     def redraw(self):
         self.root.update_idletasks()
@@ -45,7 +58,7 @@ class Window:
         if self.file_menu!=None:
             self.file_menu=None
         self.file_menu = OptionMenu(self.root,self.clicked, *self.files,command=self.file_set)
-        self.canvas.create_window(600,100,window=self.file_menu)
+        self.canvas.create_window(600,300,window=self.file_menu)
 
     def copy(self):
         if str(self.file_menu_select)[-5:]==".docx":
@@ -67,8 +80,12 @@ class Window:
 
 
     def popup_text(self,text):
+        self.canvas.create_rectangle(100, (self.height/6)*4, (self.width)-100, (self.height/6)*5, fill="white")
+        self.canvas.create_text(self.width/2,(self.height/12)*9, text=text, fill="green", font=('Helvetica 15 bold'))
+
+    def popup_screen(self,text):
         self.canvas.create_rectangle(100,200, (self.width)-100, (self.height)-200, fill="white")
-        self.canvas.create_text(self.width/2,self.height/2, text=text, fill="green", font=('Helvetica 15 bold'))
+        self.canvas.create_text(self.width/2,self.height/4, text=text, fill="green", font=('Helvetica 15 bold'))
 
     def close(self):
         self.running=False
