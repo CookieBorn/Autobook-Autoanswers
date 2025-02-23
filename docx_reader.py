@@ -1,4 +1,5 @@
 import os
+from re import X
 import tkinter
 from docx import Document
 from tkinter.ttk import *
@@ -11,25 +12,40 @@ class DOC_reader:
         self.location = os.path.join(self.win.folder, name)
         self.doc = Document(self.location)
         self.page=None
-        self.tables=None
         self.create=create
         self.progres=None
         self.prog_var=tkinter.DoubleVar()
         self.answer=answer
+        self.max=[]
+        self.min=[]
+
 
         if self.create is False:
             self.progress()
             self.strip_errors()
 
+        self.tables=self.get_tables()
+
+        if self.create is True:
+            self.input_min_max(self.win.width/4)
+            button_copy=tkinter.Button(text="Ccreate", background="green", command=self.create_setup)
+            self.win.canvas.create_window(600,300,window=button_copy)
+
         if self.answer is False:
             button_answer=tkinter.Button(text="Answer", background="green", command=self.solve_auto)
-            self.win.canvas.create_window(200,100,window=button_answer)
+            self.win.canvas.create_window((self.win.width/3)*2,100,window=button_answer)
             button_create=tkinter.Button(text="Create", background="green", command=self.create_auto)
             self.win.canvas.create_window(300,100,window=button_create)
 
         if self.answer is True:
             self.solve_auto()
 
+    def get_tables(self):
+        tables=[]
+        for table in self.doc.tables:
+            if table.cell(0,0).text=="+" or table.cell(0,0).text=="-" or table.cell(0,0).text=="x":
+                tables.append(table)
+        return tables
 
     def solve_addition(self,table,k):
         for i in range(1, len(table.rows)):
@@ -84,41 +100,66 @@ class DOC_reader:
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-answers"+self.name[-5:]))
         self.win.popup_text("Answers Complete")
 
-    def create_auto(self):
+    def create_auto(self, min, max,tables):
         k=0
         self.progress()
-        for table in self.doc.tables:
-            if table.cell(0,0).text=="+" or table.cell(0,0).text=="-" or table.cell(0,0).text=="x":
-                for i in range(1, len(table.columns)):
-                    table.cell(0,i).text=str(random.randint(0,10))
-                    k=self.progress_update(k)
-                for g in range(1,  len(table.rows)):
-                    table.cell(g,0).text=str(random.randint(0,10))
-                    k=self.progress_update(k)
-        self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
-        self.win.popup_text("Student Copy Complete")
-        self.__init__(self.name[:-5]+"-random"+self.name[-5:], self.win, answer=True)
+        for table in tables:
+            for i in range(1, len(table.columns)):
+                table.cell(0,i).text=str(random.randint(min, max))
+                k=self.progress_update(k)
+            for g in range(1,  len(table.rows)):
+                table.cell(g,0).text=str(random.randint(min, max))
+                k=self.progress_update(k)
+
 
     def strip_errors(self):
         k=0
         self.progress()
-        for table in self.doc.tables:
-            if table.cell(0,0).text=="+" or table.cell(0,0).text=="-" or table.cell(0,0).text=="x":
-                zero_zero=table.cell(0,0).text
-                for i in range(len(table.rows)):
-                    for g in range(len(table.columns)):
-                        table.cell(i,g).text="".join(c for c in table.cell(i,g).text if c.isdigit() or c=="-")
-                        k=self.progress_update(k)
-                table.cell(0,0).text=zero_zero
+        for table in self.tables:
+            zero_zero=table.cell(0,0).text
+            for i in range(len(table.rows)):
+                for g in range(len(table.columns)):
+                    table.cell(i,g).text="".join(c for c in table.cell(i,g).text if c.isdigit() or c=="-")
+                    k=self.progress_update(k)
+            table.cell(0,0).text=zero_zero
         self.doc.save(self.location)
 
 
     def progress(self):
         self.progres = Progressbar(self.win.canvas, orient = 'horizontal',variable=self.prog_var, maximum = (len(self.doc.tables)*110), mode = 'determinate')
-        self.progres.place(x=self.win.width/4,y=400,width=self.win.width/2)
+        self.progres.place(x=self.win.width/4,y=450,width=self.win.width/2)
 
     def progress_update(self, k,x=1.0):
         self.prog_var.set(k)
         self.win.root.update_idletasks()
         k+=x
         return k
+
+    def input_min_max(self, x):
+        i=0
+        while i<3:
+            max=tkinter.Label(self.win.root, text=f"Section {i+1} Max")
+            self.win.canvas.create_window(x*(i+1),330, window=max)
+
+            self.max.append(tkinter.Entry(self.win.root))
+            self.win.canvas.create_window(x*(i+1), 360, window=self.max[i])
+
+            min=tkinter.Label(self.win.root, text=f"Section {i+1} Min")
+            self.win.canvas.create_window(x*(i+1),390, window=min)
+
+            self.min.append(tkinter.Entry(self.win.root))
+            self.win.canvas.create_window(x*(i+1), 420, window=self.min[i])
+            i+=1
+
+    def create_setup(self):
+        k=3
+        tables_p1=self.tables[0:int(len(self.tables)/3)]
+        tables_p2=self.tables[int(len(self.tables)/3):int((len(self.tables))*2/3)]
+        tables_p3=self.tables[int((len(self.tables))*2/3):]
+        if k!=0:
+            self.create_auto(int(self.min[0].get()),int(self.max[0].get()),tables_p1)
+            self.create_auto(int(self.min[1].get()),int(self.max[1].get()),tables_p2)
+            self.create_auto(int(self.min[2].get()),int(self.max[2].get()),tables_p3)
+            self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
+            self.win.popup_text("Student Copy Complete")
+            self.__init__(self.name[:-5]+"-random"+self.name[-5:], self.win, answer=True)
