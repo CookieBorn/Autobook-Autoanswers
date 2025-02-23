@@ -1,5 +1,4 @@
 import os
-from re import X
 import tkinter
 from docx import Document
 from tkinter.ttk import *
@@ -18,6 +17,7 @@ class DOC_reader:
         self.answer=answer
         self.max=[]
         self.min=[]
+        self.types=[]
 
 
         if self.create is False:
@@ -127,7 +127,7 @@ class DOC_reader:
 
     def progress(self):
         self.progres = Progressbar(self.win.canvas, orient = 'horizontal',variable=self.prog_var, maximum = (len(self.doc.tables)*110), mode = 'determinate')
-        self.progres.place(x=self.win.width/4,y=450,width=self.win.width/2)
+        self.progres.place(x=self.win.width/4,y=480,width=self.win.width/2)
 
     def progress_update(self, k,x=1.0):
         self.prog_var.set(k)
@@ -137,6 +137,8 @@ class DOC_reader:
 
     def input_min_max(self, x):
         i=0
+        options=["addition","minus","multiply","division","mix","inverse mix"]
+        first=tkinter.StringVar(value=options[0])
         while i<3:
             max=tkinter.Label(self.win.root, text=f"Section {i+1} Max")
             self.win.canvas.create_window(x*(i+1),330, window=max)
@@ -149,17 +151,17 @@ class DOC_reader:
 
             self.min.append(tkinter.Entry(self.win.root))
             self.win.canvas.create_window(x*(i+1), 420, window=self.min[i])
+
+            self.types.append(tkinter.OptionMenu(self.win.root,first, *options))
+            self.win.canvas.create_window(x*(i+1),450,window=self.types[i])
+
             i+=1
 
     def create_setup(self):
-        k=3
-        tables_p1=self.tables[0:int(len(self.tables)/3)]
-        tables_p2=self.tables[int(len(self.tables)/3):int((len(self.tables))*2/3)]
-        tables_p3=self.tables[int((len(self.tables))*2/3):]
-        if k!=0:
-            self.create_auto(int(self.min[0].get()),int(self.max[0].get()),tables_p1)
-            self.create_auto(int(self.min[1].get()),int(self.max[1].get()),tables_p2)
-            self.create_auto(int(self.min[2].get()),int(self.max[2].get()),tables_p3)
-            self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
-            self.win.popup_text("Student Copy Complete")
-            self.__init__(self.name[:-5]+"-random"+self.name[-5:], self.win, answer=True)
+        k=0
+        while k<3:
+            self.create_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))])
+            k+=1
+        self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
+        self.win.popup_text("Student Copy Complete")
+        self.__init__(self.name[:-5]+"-random"+self.name[-5:], self.win, answer=True)
