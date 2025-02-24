@@ -18,6 +18,7 @@ class DOC_reader:
         self.max=[]
         self.min=[]
         self.types=[]
+        self.types_set=[]
 
 
         if self.create is False:
@@ -100,10 +101,11 @@ class DOC_reader:
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-answers"+self.name[-5:]))
         self.win.popup_text("Answers Complete")
 
-    def create_auto(self, min, max,tables):
+    def create_auto(self, min, max,tables, symbol):
         k=0
         self.progress()
         for table in tables:
+            table.cell(0,0).text=symbol
             for i in range(1, len(table.columns)):
                 table.cell(0,i).text=str(random.randint(min, max))
                 k=self.progress_update(k)
@@ -137,9 +139,10 @@ class DOC_reader:
 
     def input_min_max(self, x):
         i=0
-        options=["addition","minus","multiply","division","mix","inverse mix"]
-        first=tkinter.StringVar(value=options[0])
+        options=["+","-","x"]
         while i<3:
+            self.types_set.append(tkinter.StringVar(value=options[0]))
+
             max=tkinter.Label(self.win.root, text=f"Section {i+1} Max")
             self.win.canvas.create_window(x*(i+1),330, window=max)
 
@@ -152,7 +155,7 @@ class DOC_reader:
             self.min.append(tkinter.Entry(self.win.root))
             self.win.canvas.create_window(x*(i+1), 420, window=self.min[i])
 
-            self.types.append(tkinter.OptionMenu(self.win.root,first, *options))
+            self.types.append(tkinter.OptionMenu(self.win.root,self.types_set[i], *options))
             self.win.canvas.create_window(x*(i+1),450,window=self.types[i])
 
             i+=1
@@ -160,7 +163,7 @@ class DOC_reader:
     def create_setup(self):
         k=0
         while k<3:
-            self.create_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))])
+            self.create_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))], self.types_set[k].get())
             k+=1
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
         self.win.popup_text("Student Copy Complete")
