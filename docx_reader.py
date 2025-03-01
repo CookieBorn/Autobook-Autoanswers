@@ -19,6 +19,8 @@ class DOC_reader:
         self.min=[]
         self.types=[]
         self.types_set=[]
+        self.inverse=[]
+        self.inverse_buttons=[]
 
 
         if self.create is False:
@@ -29,8 +31,8 @@ class DOC_reader:
 
         if self.create is True:
             self.input_min_max(self.win.width/4)
-            button_copy=tkinter.Button(text="Ccreate", background="green", command=self.create_setup)
-            self.win.canvas.create_window(600,300,window=button_copy)
+            button_copy=tkinter.Button(text="Create", background="green", command=self.create_setup)
+            self.win.canvas.create_window(600,250,window=button_copy)
 
         if self.answer is False:
             button_answer=tkinter.Button(text="Answer", background="green", command=self.solve_auto)
@@ -157,6 +159,10 @@ class DOC_reader:
 
             self.types.append(tkinter.OptionMenu(self.win.root,self.types_set[i], *options))
             self.win.canvas.create_window(x*(i+1),450,window=self.types[i])
+
+            self.inverse.append(tkinter.IntVar())
+            self.inverse_buttons.append(tkinter.Checkbutton(self.win.root, text = "Inverse", variable = self.inverse[i], onvalue = 1, offvalue = 0))
+            self.win.canvas.create_window(x*(i+1),300,window=self.inverse_buttons[i])
 
             i+=1
 

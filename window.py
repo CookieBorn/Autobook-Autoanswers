@@ -46,8 +46,6 @@ class Window:
 
         DOC_reader("Auto Books Template.docx", self, True)
 
-        button_copy=Button(text="Copy", background="green", command=self.copy)
-        self.canvas.create_window(300,300,window=button_copy)
 
     def redraw(self):
         self.root.update_idletasks()
