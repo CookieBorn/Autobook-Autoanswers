@@ -107,13 +107,18 @@ class DOC_reader:
         k=0
         self.progress()
         for table in tables:
-            table.cell(0,0).text=symbol
+            options=["+","-","x"]
+            if symbol=="mixed":
+                z=options[random.randint(0,2)]
+            else:
+                z=symbol
+            table.cell(0,0).text=z
             for i in range(1, len(table.columns)):
                 table.cell(0,i).text=str(random.randint(min, max))
-                k=self.progress_update(k)
+                k=self.progress_update(k)+15
             for g in range(1,  len(table.rows)):
                 table.cell(g,0).text=str(random.randint(min, max))
-                k=self.progress_update(k)
+                k=self.progress_update(k)+15
 
 
     def strip_errors(self):
@@ -141,7 +146,7 @@ class DOC_reader:
 
     def input_min_max(self, x):
         i=0
-        options=["+","-","x"]
+        options=["+","-","x","mixed"]
         while i<3:
             self.types_set.append(tkinter.StringVar(value=options[0]))
 
@@ -169,8 +174,40 @@ class DOC_reader:
     def create_setup(self):
         k=0
         while k<3:
-            self.create_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))], self.types_set[k].get())
-            k+=1
+            x=self.types_set[k].get()
+            if self.inverse[k].get()==0:
+                self.create_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))], x)
+                k+=1
+            elif self.inverse[k].get()==1:
+                self.create_inverse_auto(int(self.min[k].get()),int(self.max[k].get()),self.tables[int(len(self.tables)/3*k):int(len(self.tables)/3*(k+1))], x)
+                k+=1
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-random"+self.name[-5:]))
         self.win.popup_text("Student Copy Complete")
         self.__init__(self.name[:-5]+"-random"+self.name[-5:], self.win, answer=True)
+
+    def create_inverse_auto(self, min, max,tables, symbol):
+            k=0
+            self.progress()
+            for table in tables:
+                options=["+","-","x"]
+                if symbol=="mixed":
+                    z=options[random.randint(0,2)]
+                else:
+                    z=symbol
+                g=1
+                table.cell(0,0).text=z
+                for i in range(1, len(table.columns)):
+                    table.cell(0,i).text=str(random.randint(min, max))
+                    k=self.progress_update(k)+15
+                while g <len(table.rows):
+                    y=random.randint(1,10)
+                    if z=="x":
+                        table.cell(g,0).text=""
+                        table.cell(g,y).text=str(random.randrange(0, y*12,int(table.cell(0,y).text)))
+                        g=g+1
+                        k=self.progress_update(k)+15
+                    else:
+                        table.cell(g,0).text=""
+                        table.cell(g,y).text=str(random.randint(min, max))
+                        g=g+1
+                        k=self.progress_update(k)+15
