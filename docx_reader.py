@@ -74,7 +74,7 @@ class DOC_reader:
                     k=self.progress_update(k)
         return k
 
-    def solve_division(self, table,k):
+    def solve_inverse_multiplication(self, table,k):
         for i in range(1, len(table.rows)):
             for g in range(1, len(table.columns)):
                 if table.cell(i,g).text != " " and table.cell(i,g).text != "":
@@ -87,19 +87,54 @@ class DOC_reader:
                     k=self.progress_update(k,0.5)
         return k
 
+    def solve_inverse_addition(self, table,k):
+        for i in range(1, len(table.rows)):
+            for g in range(1, len(table.columns)):
+                if table.cell(i,g).text != " " and table.cell(i,g).text != "":
+                    table.cell(i,0).text=str(float(table.cell(i,g).text)-float(table.cell(0,g).text))
+                    k=self.progress_update(k,0.5)
+        for i in range(1, len(table.rows)):
+            for g in range(1, len(table.columns)):
+                if table.cell(i,0).text != " " and table.cell(i,0).text != "":
+                    table.cell(i,g).text=str(float(table.cell(0,g).text)+float(table.cell(i,0).text))
+                    k=self.progress_update(k,0.5)
+        return k
+
+    def solve_inverse_subtraction(self, table,k):
+        for i in range(1, len(table.rows)):
+            for g in range(1, len(table.columns)):
+                if table.cell(i,g).text != " " and table.cell(i,g).text != "":
+                    table.cell(i,0).text=str((float(table.cell(i,g).text)-float(table.cell(0,g).text))*(-1))
+                    k=self.progress_update(k,0.5)
+        for i in range(1, len(table.rows)):
+            for g in range(1, len(table.columns)):
+                if table.cell(i,0).text != " " and table.cell(i,0).text != "":
+                    table.cell(i,g).text=str(float(table.cell(0,g).text)-float(table.cell(i,0).text))
+                    k=self.progress_update(k,0.5)
+        return k
+
     def solve_auto(self):
         k=0.0
         self.progress()
-        for table in self.doc.tables:
+        x=0
+        while x<len(self.doc.tables):
+            table = self.doc.tables[x]
             if table.cell(0,0).text=="+":
-                k=self.solve_addition(table,k)
+                if table.cell(1,0).text != "":
+                    k=self.solve_addition(table,k)
+                else:
+                    k=self.solve_inverse_addition(table,k)
             elif table.cell(0,0).text=="-":
-                k=self.solve_subtraction(table,k)
+                if table.cell(1,0).text != "":
+                    k=self.solve_subtraction(table,k)
+                else:
+                    k=self.solve_inverse_subtraction(table,k)
             elif table.cell(0,0).text=="x":
                 if table.cell(1,0).text != "":
                     k=self.solve_multiplication(table,k)
                 else:
-                    k=self.solve_division(table,k)
+                    k=self.solve_inverse_multiplication(table,k)
+            x=x+1
         self.doc.save(os.path.join(self.win.folder, self.name[:-5]+"-answers"+self.name[-5:]))
         self.win.popup_text("Answers Complete")
 
@@ -203,7 +238,7 @@ class DOC_reader:
                     y=random.randint(1,10)
                     if z=="x":
                         table.cell(g,0).text=""
-                        table.cell(g,y).text=str(random.randrange(0, y*12,int(table.cell(0,y).text)))
+                        table.cell(g,y).text=str(random.randrange(0, int(table.cell(0,y).text)*12,int(table.cell(0,y).text)))
                         g=g+1
                         k=self.progress_update(k)+15
                     else:
